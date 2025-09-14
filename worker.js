@@ -93,12 +93,12 @@ export default {
             const userAgent = UA.toLowerCase();
             userID = env.UUID || env.uuid || env.PASSWORD || env.pswd || userID;
             if (env.KEY || env.TOKEN || (userID && !isValidUUID(userID))) {
-                return new Response('UUID变量不符合规范', {
-                    status: 404,
-                    headers: {
-                        "Content-Type": "text/plain;charset=utf-8",
-                    }
-                });
+                dynamicUuid = env.KEY || env.TOKEN || userID;
+                validTime = Number(env.TIME) || validTime;
+                updateTime = Number(env.UPTIME) || updateTime;
+                const userIDs = await 生成动态UUID(dynamicUuid);
+                userID = userIDs[0];
+                userIDLow = userIDs[1];
             } else dynamicUuid = userID;
 
             if (!userID) {
