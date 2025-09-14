@@ -38,13 +38,13 @@ let proxyhostsURL = atob('aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2NtbGl1L2
 let RproxyIP = 'false';
 const httpPorts = ["8080", "8880", "2052", "2082", "2086", "2095"];
 let httpsPorts = ["2053", "2083", "2087", "2096", "8443"];
-let 有效时间 = 7;
-let 更新时间 = 3;
+let validTime = 7;
+let UpdateTime = 3;
 let userIDLow;
 let userIDTime = "";
 let proxyIPPool = [];
 let path = '/?ed=2560';
-let 动态UUID = userID;
+let dynamicUuid = userID;
 let link = [];
 let banHosts = [atob('c3BlZWQuY2xvdWRmbGFyZS5jb20=')];
 let SCV = 'true';
@@ -93,13 +93,13 @@ export default {
             const userAgent = UA.toLowerCase();
             userID = env.UUID || env.uuid || env.PASSWORD || env.pswd || userID;
             if (env.KEY || env.TOKEN || (userID && !isValidUUID(userID))) {
-                动态UUID = env.KEY || env.TOKEN || userID;
-                有效时间 = Number(env.TIME) || 有效时间;
-                更新时间 = Number(env.UPTIME) || 更新时间;
-                const userIDs = await 生成动态UUID(动态UUID);
+                dynamicUuid = env.KEY || env.TOKEN || userID;
+                validTime = Number(env.TIME) || validTime;
+                UpdateTime = Number(env.UPTIME) || UpdateTime;
+                const userIDs = await 生成动态UUID(dynamicUuid);
                 userID = userIDs[0];
                 userIDLow = userIDs[1];
-            } else 动态UUID = userID;
+            } else dynamicUuid = userID;
 
             if (!userID) {
                 return new Response('请设置你的UUID变量，或尝试重试部署，检查变量是否生效？', {
@@ -208,13 +208,13 @@ export default {
                 } else if (路径 == `/${fakeUserID}`) {
                     const fakeConfig = await 生成配置信息(userID, request.headers.get('Host'), sub, 'CF-Workers-SUB', RproxyIP, url, fakeUserID, fakeHostName, env);
                     return new Response(`${fakeConfig}`, { status: 200 });
-                } else if ((url.pathname == `/${动态UUID}/config.json` || 路径 == `/${userID}/config.json`) && url.searchParams.get('token') === await 双重哈希(fakeUserID + UA)) {
+                } else if ((url.pathname == `/${dynamicUuid}/config.json` || 路径 == `/${userID}/config.json`) && url.searchParams.get('token') === await 双重哈希(fakeUserID + UA)) {
                     return await config_Json(userID, request.headers.get('Host'), sub, UA, RproxyIP, url, fakeUserID, fakeHostName, env);
-                } else if (url.pathname == `/${动态UUID}/edit` || 路径 == `/${userID}/edit`) {
+                } else if (url.pathname == `/${dynamicUuid}/edit` || 路径 == `/${userID}/edit`) {
                     return await KV(request, env);
-                } else if (url.pathname == `/${动态UUID}/bestip` || 路径 == `/${userID}/bestip`) {
+                } else if (url.pathname == `/${dynamicUuid}/bestip` || 路径 == `/${userID}/bestip`) {
                     return await bestIP(request, env);
-                } else if (url.pathname == `/${动态UUID}` || 路径 == `/${userID}`) {
+                } else if (url.pathname == `/${dynamicUuid}` || 路径 == `/${userID}`) {
                     await sendMessage(`#获取订阅 ${FileName}`, request.headers.get('CF-Connecting-IP'), `UA: ${UA}</tg-spoiler>\n域名: ${url.hostname}\n<tg-spoiler>入口: ${url.pathname + url.search}</tg-spoiler>`);
                     const 维列斯Config = await 生成配置信息(userID, request.headers.get('Host'), sub, UA, RproxyIP, url, fakeUserID, fakeHostName, env);
                     const now = Date.now();
@@ -2585,8 +2585,8 @@ function isValidIPv4(address) {
  */
 function 生成动态UUID(密钥) {
     const 时区偏移 = 8; // 北京时间相对于UTC的时区偏移+8小时
-    const 起始日期 = new Date(2007, 6, 7, 更新时间, 0, 0); // 固定起始日期为2007年7月7日的凌晨3点
-    const 一周的毫秒数 = 1000 * 60 * 60 * 24 * 有效时间;
+    const 起始日期 = new Date(2007, 6, 7, UpdateTime, 0, 0); // 固定起始日期为2007年7月7日的凌晨3点
+    const 一周的毫秒数 = 1000 * 60 * 60 * 24 * validTime;
 
     function 获取当前周数() {
         const 现在 = new Date();
@@ -5222,7 +5222,7 @@ async function nginx() {
  */
 
 async function config_Json(userID, hostName, sub, UA, RproxyIP, _url, fakeUserID, fakeHostName, env) {
-    const uuid = (_url.pathname.startsWith(`/${动态UUID}/`)) ? 动态UUID : userID;
+    const uuid = (_url.pathname.startsWith(`/${dynamicUuid}/`)) ? dynamicUuid : userID;
     const newSocks5s = socks5s.map(socks5Address => {
         if (socks5Address.includes('@')) return socks5Address.split('@')[1];
         else if (socks5Address.includes('//')) return socks5Address.split('//')[1];
@@ -5244,8 +5244,8 @@ async function config_Json(userID, hostName, sub, UA, RproxyIP, _url, fakeUserID
                 TOKEN: uuid || null,
                 UUID: userID.toLowerCase() || null,
                 UUIDLow: userIDLow || null,
-                TIME: 有效时间 || null,
-                UPTIME: 更新时间 || null,
+                TIME: validTime || null,
+                UPTIME: UpdateTime || null,
                 fakeUserID: fakeUserID || null,
             } : {
                 DynamicUUID: false,
@@ -6770,7 +6770,7 @@ function config_Html(token = "test", proxyhost = "") {
                 configItems = [
                     { label: 'HOST', value: config.HOST },
                     { label: 'TOKEN', value: config.KEY.TOKEN || '未设置' },
-                    { label: '动态UUID', value: '✅ 启用，有效时间：' + config.KEY.TIME + '天，更新时间：UTC+8 ' + config.KEY.UPTIME + '点更新' },
+                    { label: 'dynamicUuid', value: '✅ 启用，validTime：' + config.KEY.TIME + '天，UpdateTime：UTC+8 ' + config.KEY.UPTIME + '点更新' },
                     { label: 'UUID', value: config.KEY.UUID },
                     { label: 'FKID', value: config.KEY.fakeUserID },
                     { label: '跳过TLS验证', value: config.SCV === 'true' ? '✅ 启用' : '❌ 禁用' }
@@ -6779,7 +6779,7 @@ function config_Html(token = "test", proxyhost = "") {
                 // 动态UUID未启用时只显示UUID和FKID
                 configItems = [
                     { label: 'HOST', value: config.HOST },
-                    { label: '动态UUID', value: '❌ 禁用' },
+                    { label: 'dynamicUuid', value: '❌ 禁用' },
                     { label: 'UUID', value: config.KEY.UUID },
                     { label: 'FKID', value: config.KEY.fakeUserID },
                     { label: '跳过TLS验证', value: config.SCV === 'true' ? '✅ 启用' : '❌ 禁用' }
@@ -7197,4 +7197,5 @@ function config_Html(token = "test", proxyhost = "") {
     return html;
 
 }
+
 
